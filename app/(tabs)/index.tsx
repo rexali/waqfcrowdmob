@@ -1,31 +1,53 @@
-import { StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import ZakatDonation from '../(donations)/ZakatDonation';
+import WaqfDonation from '../(donations)/WaqfDonation';
+import React, { useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getDonationsData, getWaqfDonations, getZakatDonations } from '../(donations)/donationsSlice';
+import SplashScreen from '../../components/common/SplashScreen';
+import { getWaqfData } from '../(waqfs)/waqfsSlice';
 
-import EditScreenInfo from '../../components/EditScreenInfo';
-import { Text, View } from '../../components/Themed';
+export default function Home() {
+  const dispatch = useDispatch<any>();
+  const mountRef = useRef(true);
+  const waqfDonations = useSelector(getWaqfDonations);
+  const zakatDonations = useSelector(getZakatDonations);
 
-export default function TabOneScreen() {
+  const dispatchGetDonationData = async () => {
+    dispatch(getDonationsData()).unwrap();
+    dispatch(getWaqfData()).unwrap();
+
+  }
+
+  React.useEffect(() => {
+    if (mountRef.current) {
+      dispatchGetDonationData();
+    }
+    return () => {
+      mountRef.current = false; 
+    } 
+  });
+
+  if (!waqfDonations.length) {
+    return <SplashScreen flex={1} />
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+    <View>
+      <WaqfDonation donations={waqfDonations} />
+      <View style={styles.separator} />
+      <ZakatDonation donations={zakatDonations} />
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
+
   separator: {
-    marginVertical: 30,
+    marginVertical: 7,
     height: 1,
-    width: '80%',
+    width: '100%',
+    backgroundColor: 'green',
+    textAlign: 'center'
   },
 });
